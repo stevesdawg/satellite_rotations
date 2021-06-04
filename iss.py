@@ -103,8 +103,7 @@ def main():
     iss = ephem.readtle(line0, line1, line2)
     now = datetime.datetime.utcnow()
     iss.compute(now)
-    #  iss_angles[:] = degrees(iss.sublat), degrees(iss.sublong), iss.elevation
-    iss_angles[:] = 25.7743, -80.1937, 0
+    iss_angles[:] = degrees(iss.sublat), degrees(iss.sublong), iss.elevation
     print(
         "ISS Lat: {}, ISS Lon: {}, ISS Elevation: {}".format(
             iss_angles[0], iss_angles[1], iss_angles[2]
