@@ -1,20 +1,23 @@
 import datetime
-from math import degrees, pi, sin, cos, radians
-import subprocess
-
-import numpy as np
-import matplotlib.pyplot as plt
-import scipy
-import ephem
 import json
+import subprocess
+from math import cos, degrees, pi, radians, sin
+
+import ephem
 import geocoder
+import matplotlib.pyplot as plt
+import numpy as np
 import requests
+import scipy
 
 OPEN_NOTIFY = "http://api.open-notify.org/iss-now.json"
 CELESTRAK = "http://celestrak.com/NORAD/elements/stations.txt"
-ELEV_QUERY = "https://www.nationalmap.gov/epqs/pqs.php?x={}&y={}&units=Meters&output=json"
+ELEV_QUERY = (
+    "https://www.nationalmap.gov/epqs/pqs.php?x={}&y={}&units=Meters&output=json"
+)
 CURL = ["curl", "-X", "GET"]
-EARTH_RADIUS = 6.3781E6
+EARTH_RADIUS = 6.3781e6
+
 
 def latlong2ecef(lat, long, elev):
     dist = EARTH_RADIUS + elev
@@ -66,8 +69,14 @@ def main():
     CURL.append(ELEV_QUERY.format(my_angles[1], my_angles[0]))
     elev_str = subprocess.check_output(CURL)
     elev_data = json.loads(elev_str)
-    my_angles[2] = float(elev_data["USGS_Elevation_Point_Query_Service"]["Elevation_Query"]["Elevation"])
-    print("\nMy Lat: {}, My Long: {}, My Elevation: {}".format(my_angles[0], my_angles[1], my_angles[2]))
+    my_angles[2] = float(
+        elev_data["USGS_Elevation_Point_Query_Service"]["Elevation_Query"]["Elevation"]
+    )
+    print(
+        "\nMy Lat: {}, My Long: {}, My Elevation: {}".format(
+            my_angles[0], my_angles[1], my_angles[2]
+        )
+    )
 
     my_xyz[:] = latlong2ecef(my_angles[0], my_angles[1], my_angles[2])
     print("My X: {}, My Y: {}, My Z: {}".format(my_xyz[0], my_xyz[1], my_xyz[2]))
@@ -96,17 +105,25 @@ def main():
     iss.compute(now)
     #  iss_angles[:] = degrees(iss.sublat), degrees(iss.sublong), iss.elevation
     iss_angles[:] = 25.7743, -80.1937, 0
-    print("ISS Lat: {}, ISS Lon: {}, ISS Elevation: {}".format(iss_angles[0], iss_angles[1], iss_angles[2]))
+    print(
+        "ISS Lat: {}, ISS Lon: {}, ISS Elevation: {}".format(
+            iss_angles[0], iss_angles[1], iss_angles[2]
+        )
+    )
 
     iss_xyz[:] = latlong2ecef(iss_angles[0], iss_angles[1], iss_angles[2])
-    print("ISS X: {}, ISS Y: {}, ISS Z: {}\n".format(iss_xyz[0], iss_xyz[1], iss_xyz[2]))
+    print(
+        "ISS X: {}, ISS Y: {}, ISS Z: {}\n".format(iss_xyz[0], iss_xyz[1], iss_xyz[2])
+    )
 
     # ISS In Observer NED (North-East-Down) Frame.
     # This is a Local Tangent Plane for an observer on the Earth's surface.
     # First, translate ECEF coordinates of ISS to observer origin reference frame
     # Then, rotate the result by the NED rotation matrix
     iss_translate = translate_point(iss_xyz, my_xyz)
-    print("ISS translated to observer origin reference frame:\n{}".format(iss_translate))
+    print(
+        "ISS translated to observer origin reference frame:\n{}".format(iss_translate)
+    )
 
     iss_rotate = ned_rotmat.T @ iss_translate
     print("ISS rotated to observer NED frame:\n{}".format(iss_rotate))
